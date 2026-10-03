@@ -6,75 +6,54 @@ Difficulty: Medium
 Topic:
 - Graphs
 - Minimum Spanning Tree
-- Kruskal's Algorithm
-- Union-Find / DSU
+- Prim's Algorithm
+- Greedy
 
 Approach:
-- Treat every point as a graph node.
-- Create an edge between every pair of points.
-- The edge weight is the Manhattan distance between the points.
-- Sort all edges by weight.
-- Use Kruskal's Algorithm to repeatedly choose the cheapest edge
-  that connects two different components.
-- Union the components using DSU.
-- Stop after selecting n - 1 edges, since a spanning tree contains
-  exactly n - 1 edges.
+- Treat every point as a node in a complete graph.
+- The cost of connecting two points is their Manhattan distance.
+- Start with point 0 and gradually build the Minimum Spanning Tree.
+- min_dist[i] stores the minimum cost currently known to connect
+  point i to the existing MST.
+- At each step, choose the unvisited point with the smallest
+  connection cost.
+- Add that cost to the total and update the connection costs
+  of the remaining unvisited points.
 
-Time Complexity: O(n^2 log n)
-Space Complexity: O(n^2)
+Time Complexity: O(n^2)
+Space Complexity: O(n)
 """
 
 class Solution:
     def minCostConnectPoints(self, points: list[list[int]]) -> int:
         n = len(points)
-        edges = []
 
-        for i in range(n):
-            for j in range(i + 1, n):
-                x1, y1 = points[i]
-                x2, y2 = points[j]
+        visited = [False] * n
+        min_dist = [float('inf')] * n
 
-                weight = abs(x1 - x2) + abs(y1 - y2)
-                edges.append((i, j, weight))
-
-        edges.sort(key=lambda x: x[2])
-
-        parent = list(range(n))
-        size = [1] * n
-
-        def find(x):
-            if x == parent[x]:
-                return x
-
-            parent[x] = find(parent[x])
-            return parent[x]
-
-        def union(a, b):
-            rootA = find(a)
-            rootB = find(b)
-
-            if rootA == rootB:
-                return False
-
-            if size[rootA] < size[rootB]:
-                rootA, rootB = rootB, rootA
-
-            parent[rootB] = rootA
-            size[rootA] += size[rootB]
-
-            return True
-
+        min_dist[0] = 0
         total = 0
-        count = 0
 
-        for a, b, weight in edges:
-            if not union(a, b):
-                continue
+        for _ in range(n):
+            min_cost = float('inf')
+            current = -1
 
-            total += weight
-            count += 1
+            for i in range(n):
+                if not visited[i] and min_dist[i] < min_cost:
+                    min_cost = min_dist[i]
+                    current = i
 
-            if count == n - 1:
-                break
+            visited[current] = True
+            total += min_cost
+
+            for i in range(n):
+                if not visited[i]:
+                    x1, y1 = points[current]
+                    x2, y2 = points[i]
+
+                    cost = abs(x1 - x2) + abs(y1 - y2)
+
+                    if cost < min_dist[i]:
+                        min_dist[i] = cost
 
         return total
