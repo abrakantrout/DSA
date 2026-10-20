@@ -1,6 +1,3 @@
-
-from collections import deque
-
 """
 Problem: Sliding Window Maximum
 LeetCode: 239
